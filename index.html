@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CardDealAlert - クレジットカードお得情報を即通知</title>
+  <meta name="description" content="CardDealAlertは、クレジットカードのキャンペーン・特典情報をリアルタイムでお知らせするAndroidアプリです。Yahoo!ショッピング・楽天市場の最新セール情報も毎日配信。">
+  <meta name="keywords" content="クレジットカード,キャンペーン,お得,ポイント,セール,通知,Android,アプリ">
+  <meta property="og:title" content="CardDealAlert - クレジットカードお得情報を即通知">
+  <meta property="og:description" content="クレジットカードのキャンペーン・特典情報をリアルタイム通知。Yahoo!ショッピング・楽天市場の最新セール情報も毎日配信。">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --red: #E8002D;
+      --red-dark: #B5001F;
+      --gold: #F5A800;
+      --gold-light: #FFD166;
+      --dark: #0D0D0D;
+      --dark2: #1A1A1A;
+      --dark3: #252525;
+      --gray: #6B6B6B;
+      --light: #F5F5F0;
+      --white: #FFFFFF;
+      --text: #1A1A1A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: var(--dark);
+      color: var(--white);
+      overflow-x: hidden;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(13,13,13,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-family: 'Oswald', sans-serif;
+      font-size: 22px;
+      letter-spacing: 2px;
+      color: var(--white);
+    }
+    .logo span { color: var(--red); }
+
+    nav a {
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 13px;
+      margin-left: 24px;
+      transition: color 0.2s;
+    }
+    nav a:hover { color: var(--gold); }
+
+    /* ===== HERO ===== */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 80px 24px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 70% 50%, rgba(232,0,45,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at 20% 80%, rgba(245,168,0,0.08) 0%, transparent 60%),
+        var(--dark);
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    .hero-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+      width: 100%;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(232,0,45,0.15);
+      border: 1px solid rgba(232,0,45,0.4);
+      color: #FF4D6D;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      padding: 6px 14px;
+      border-radius: 2px;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+    }
+    .hero-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--red);
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.4); }
+    }
+
+    .hero h1 {
+      font-family: 'Oswald', sans-serif;
+      font-size: clamp(40px, 6vw, 72px);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -1px;
+      margin-bottom: 20px;
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: var(--gold);
+      display: block;
+    }
+
+    .hero-desc {
+      font-size: 16px;
+      line-height: 1.8;
+      color: rgba(255,255,255,0.65);
+      margin-bottom: 36px;
+    }
+
+    .cta-group {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--red);
+      color: var(--white);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 15px;
+      padding: 14px 28px;
+      border-radius: 4px;
+      transition: background 0.2s, transform 0.15s;
+      letter-spacing: 0.5px;
+    }
+    .btn-primary:hover { background: var(--red-dark); transform: translateY(-1px); }
+
+    .btn-secondary {
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      padding-bottom: 2px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-secondary:hover { color: var(--gold); border-color: var(--gold); }
+
+    /* Mock Phone */
+    .hero-phone {
+      position: relative;
+      display: flex;
+      justify-content: center;
+    }
+
+    .phone-frame {
+      width: 260px;
+      background: var(--dark2);
+      border-radius: 40px;
+      border: 2px solid rgba(255,255,255,0.12);
+      padding: 20px 16px;
+      position: relative;
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,0.5),
+        0 40px 80px rgba(0,0,0,0.6),
+        0 0 60px rgba(232,0,45,0.1);
+    }
+    .phone-notch {
+      width: 80px; height: 8px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 4px;
+      margin: 0 auto 16px;
+    }
+
+    .notification-card {
+      background: var(--dark3);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      border-left: 3px solid var(--red);
+      animation: slideIn 0.6s ease both;
+    }
+    .notification-card:nth-child(3) { animation-delay: 0.3s; border-left-color: var(--gold); }
+    .notification-card:nth-child(4) { animation-delay: 0.6s; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .notif-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .notif-icon {
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .notif-icon.red { background: rgba(232,0,45,0.2); }
+    .notif-icon.gold { background: rgba(245,168,0,0.2); }
+
+    .notif-title { font-size: 11px; font-weight: 700; color: var(--white); }
+    .notif-time { font-size: 10px; color: rgba(255,255,255,0.35); margin-left: auto; }
+
+    .notif-body { font-size: 11px; color: rgba(255,255,255,0.55); line-height: 1.5; }
+
+    .notif-badge {
+      display: inline-block;
+      background: var(--red);
+      color: white;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 2px;
+      margin-top: 4px;
+    }
+    .notif-badge.gold-badge { background: var(--gold); color: var(--dark); }
+
+    /* ===== FEATURES ===== */
+    .section {
+      padding: 80px 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: clamp(28px, 4vw, 48px);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 48px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .feature-item {
+      background: var(--dark2);
+      padding: 32px 28px;
+      transition: background 0.2s;
+    }
+    .feature-item:hover { background: var(--dark3); }
+
+    .feature-icon {
+      font-size: 28px;
+      margin-bottom: 16px;
+    }
+
+    .feature-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--white);
+    }
+
+    .feature-text {
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.7;
+    }
+
+    /* ===== DEALS SECTION ===== */
+    .deals-section {
+      background: var(--dark2);
+      padding: 80px 24px;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .deals-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .deals-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 40px;
+    }
+
+    .deal-card {
+      background: var(--dark3);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px;
+      padding: 20px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      transition: border-color 0.2s;
+    }
+    .deal-card:hover { border-color: rgba(232,0,45,0.3); }
+
+    .deal-platform {
+      flex-shrink: 0;
+      width: 44px; height: 44px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .deal-platform.yahoo { background: rgba(255,0,0,0.1); }
+    .deal-platform.rakuten { background: rgba(189,0,0,0.1); }
+
+    .deal-info { flex: 1; min-width: 0; }
+    .deal-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+    .deal-detail { font-size: 12px; color: rgba(255,255,255,0.45); line-height: 1.5; }
+
+    .deal-discount {
+      font-family: 'Oswald', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--red);
+      flex-shrink: 0;
+    }
+
+    /* ===== AFFILIATE NOTICE ===== */
+    .affiliate-section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    .affiliate-box {
+      background: rgba(245,168,0,0.06);
+      border: 1px solid rgba(245,168,0,0.2);
+      border-radius: 8px;
+      padding: 24px 28px;
+    }
+
+    .affiliate-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .affiliate-text {
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.8;
+    }
+
+    /* ===== DOWNLOAD ===== */
+    .download-section {
+      background: linear-gradient(135deg, var(--red-dark), var(--dark));
+      padding: 80px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .download-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(232,0,45,0.15) 0%, transparent 70%);
+    }
+
+    .download-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .download-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: clamp(32px, 5vw, 56px);
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .download-sub {
+      color: rgba(255,255,255,0.6);
+      font-size: 15px;
+      margin-bottom: 36px;
+      line-height: 1.7;
+    }
+
+    .store-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--dark);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: var(--white);
+      text-decoration: none;
+      padding: 14px 28px;
+      border-radius: 8px;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .store-badge:hover { border-color: rgba(255,255,255,0.4); transform: translateY(-2px); }
+    .store-badge-text { text-align: left; }
+    .store-badge-sub { font-size: 11px; color: rgba(255,255,255,0.5); display: block; }
+    .store-badge-name { font-size: 16px; font-weight: 700; }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: var(--dark);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 40px 24px;
+    }
+
+    .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .footer-logo {
+      font-family: 'Oswald', sans-serif;
+      font-size: 20px;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+    .footer-logo span { color: var(--red); }
+
+    .footer-desc {
+      font-size: 12px;
+      color: rgba(255,255,255,0.35);
+      max-width: 280px;
+      line-height: 1.7;
+    }
+
+    .footer-links h4 {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .footer-links ul { list-style: none; }
+    .footer-links li { margin-bottom: 8px; }
+    .footer-links a {
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--white); }
+
+    .footer-bottom {
+      margin-top: 32px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      font-size: 12px;
+      color: rgba(255,255,255,0.25);
+      text-align: center;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .hero-inner { grid-template-columns: 1fr; gap: 40px; }
+      .hero-phone { order: -1; }
+      .phone-frame { width: 220px; }
+      .features-grid { grid-template-columns: 1fr; gap: 0; }
+      .deals-grid { grid-template-columns: 1fr; }
+      nav { display: none; }
+      .footer-inner { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">CARD<span>DEAL</span>ALERT</div>
+    <nav>
+      <a href="#features">機能</a>
+      <a href="#deals">お得情報</a>
+      <a href="#download">ダウンロード</a>
+      <a href="privacy.html">プライバシーポリシー</a>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-inner">
+      <div class="hero-content">
+        <div class="hero-badge">🔔 リアルタイム通知</div>
+        <h1>
+          カードの<br>お得情報を<br>
+          <em>逃さない。</em>
+        </h1>
+        <p class="hero-desc">
+          クレジットカードのキャンペーン・特典情報をプッシュ通知でお届け。<br>
+          Yahoo!ショッピング・楽天市場の3%以上割引セール情報も毎日自動配信。
+        </p>
+        <div class="cta-group">
+          <a href="https://play.google.com/store/apps/details?id=jp.hokkaido.carddealalert" class="btn-primary" target="_blank" rel="noopener">
+            📲 Google Playで無料ダウンロード
+          </a>
+          <a href="#features" class="btn-secondary">機能を見る →</a>
+        </div>
+      </div>
+
+      <div class="hero-phone">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+
+          <div class="notification-card">
+            <div class="notif-header">
+              <div class="notif-icon red">🃏</div>
+              <div>
+                <div class="notif-title">CardDealAlert</div>
+              </div>
+              <div class="notif-time">今</div>
+            </div>
+            <div class="notif-body">
+              🔥 セール中！ポイント最大10%還元キャンペーン開始
+            </div>
+            <span class="notif-badge">-8% OFF</span>
+          </div>
+
+          <div class="notification-card">
+            <div class="notif-header">
+              <div class="notif-icon gold">🛒</div>
+              <div>
+                <div class="notif-title">Yahoo!ショッピング</div>
+              </div>
+              <div class="notif-time">8:30</div>
+            </div>
+            <div class="notif-body">
+              本日限定！対象カードで+5%ポイント還元
+            </div>
+            <span class="notif-badge gold-badge">条件達成でさらにUP</span>
+          </div>
+
+          <div class="notification-card">
+            <div class="notif-header">
+              <div class="notif-icon red">🎌</div>
+              <div>
+                <div class="notif-title">楽天市場</div>
+              </div>
+              <div class="notif-time">12:00</div>
+            </div>
+            <div class="notif-body">
+              SPU対象 最大3%還元 × 楽天カード特典
+            </div>
+            <span class="notif-badge">新着セール</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features" class="section">
+    <div class="section-label">Features</div>
+    <div class="section-title">このアプリでできること</div>
+
+    <div class="features-grid">
+      <div class="feature-item">
+        <div class="feature-icon">🔔</div>
+        <div class="feature-title">プッシュ通知でリアルタイム配信</div>
+        <div class="feature-text">毎日0:01・8:30・12:00・19:00の4回、最新のセール情報を自動でプッシュ通知。3%以上の割引が確認された時だけ通知するため、不要な通知がありません。</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🛍️</div>
+        <div class="feature-title">Yahoo!&amp;楽天 同時チェック</div>
+        <div class="feature-text">Yahoo!ショッピングと楽天市場の両方のセール情報をまとめて確認。2つのアプリを行き来する手間が省けます。</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">💳</div>
+        <div class="feature-title">カードキャンペーン一覧</div>
+        <div class="feature-text">各クレジットカードの開催中キャンペーンをわかりやすく一覧表示。期間・条件・還元率を一目で把握できます。</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🔥</div>
+        <div class="feature-title">SALE中バッジ表示</div>
+        <div class="feature-text">現在セール中の案件には「🔥 SALE中」バッジを表示。一覧を見るだけで今お得な情報がすぐわかります。</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title">完全無料・広告なし（予定）</div>
+        <div class="feature-text">基本機能はすべて無料でご利用いただけます。アカウント登録不要でインストールすぐに使い始められます。</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🇯🇵</div>
+        <div class="feature-title">日本向け特化設計</div>
+        <div class="feature-text">日本国内のクレジットカードキャンペーン・ポイント還元情報に特化。国内主要ECの情報を網羅的にカバーします。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEALS -->
+  <section id="deals" class="deals-section">
+    <div class="deals-inner">
+      <div class="section-label">Latest Deals</div>
+      <div class="section-title">こんなお得情報を配信しています</div>
+
+      <div class="deals-grid">
+        <div class="deal-card">
+          <div class="deal-platform yahoo">🛒</div>
+          <div class="deal-info">
+            <div class="deal-name">Yahoo!ショッピング × PayPayカード</div>
+            <div class="deal-detail">毎月5のつく日・日曜日はポイント最大還元<br>対象カード利用で追加ポイント付与</div>
+          </div>
+          <div class="deal-discount">+5%</div>
+        </div>
+
+        <div class="deal-card">
+          <div class="deal-platform rakuten">🎌</div>
+          <div class="deal-info">
+            <div class="deal-name">楽天市場 SPU × 楽天カード</div>
+            <div class="deal-detail">楽天カード通常利用で+2倍<br>楽天プレミアムカードで+4倍</div>
+          </div>
+          <div class="deal-discount">+3%</div>
+        </div>
+
+        <div class="deal-card">
+          <div class="deal-platform yahoo">🛒</div>
+          <div class="deal-info">
+            <div class="deal-name">Yahoo!ショッピング 超PayPay祭</div>
+            <div class="deal-detail">期間限定！対象ショップでポイント大幅アップ<br>条件達成でさらにボーナス付与</div>
+          </div>
+          <div class="deal-discount">+7%</div>
+        </div>
+
+        <div class="deal-card">
+          <div class="deal-platform rakuten">🎌</div>
+          <div class="deal-info">
+            <div class="deal-name">楽天スーパーセール</div>
+            <div class="deal-detail">半期に一度の大型セール<br>お買い物マラソン同時開催でポイント倍増</div>
+          </div>
+          <div class="deal-discount">最大20%</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AFFILIATE NOTICE -->
+  <div class="affiliate-section">
+    <div class="affiliate-box">
+      <div class="affiliate-title">
+        📋 アフィリエイト広告について
+      </div>
+      <div class="affiliate-text">
+        当サイトおよびアプリ内では、「もしもアフィリエイト」を通じたアフィリエイト広告を掲載しています。<br>
+        Yahoo!ショッピング・楽天市場へのリンクには、アフィリエイトリンクが含まれる場合があります。<br>
+        ユーザーの皆様がリンク経由でご購入された場合、当サービスに一定の報酬が発生することがあります。<br>
+        なお、掲載するセール情報・価格情報は公平な基準で選定しており、広告主からの優遇はありません。
+      </div>
+    </div>
+  </div>
+
+  <!-- DOWNLOAD -->
+  <section id="download" class="download-section">
+    <div class="download-inner">
+      <div class="section-label" style="color: rgba(255,255,255,0.5);">Download</div>
+      <div class="download-title">今すぐ無料で<br>始めよう</div>
+      <p class="download-sub">
+        インストール不要・会員登録不要。<br>
+        Google Playからダウンロードしてすぐ使えます。
+      </p>
+      <a href="https://play.google.com/store/apps/details?id=jp.hokkaido.carddealalert" class="store-badge" target="_blank" rel="noopener">
+        <span style="font-size:28px;">▶</span>
+        <div class="store-badge-text">
+          <span class="store-badge-sub">GET IT ON</span>
+          <span class="store-badge-name">Google Play</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div>
+        <div class="footer-logo">CARD<span>DEAL</span>ALERT</div>
+        <p class="footer-desc">クレジットカードのキャンペーン・セール情報をリアルタイムでお届けするAndroidアプリです。</p>
+      </div>
+
+      <div class="footer-links">
+        <h4>リンク</h4>
+        <ul>
+          <li><a href="#features">機能紹介</a></li>
+          <li><a href="#deals">お得情報</a></li>
+          <li><a href="#download">ダウンロード</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-links">
+        <h4>サポート</h4>
+        <ul>
+          <li><a href="privacy.html">プライバシーポリシー</a></li>
+          <li><a href="terms.html">利用規約</a></li>
+          <li><a href="contact.html">お問い合わせ</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      © 2025 CardDealAlert. All rights reserved. |
+      当サイトはアフィリエイト広告を掲載しています。
+    </div>
+  </footer>
+
+</body>
+</html>
